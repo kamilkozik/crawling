@@ -39,15 +39,15 @@ class OfferFlat(object):
         return price
 
     def set_offer_price(self):
-        self.title = self.get_offer_url()
+        self.title = self.get_offer_price()
 
     def get_offer_area(self):
         area_text = self.soup.find('li', {'class': 'offer-item-area'}).text
         area = int(area_text.replace(u'm', u'').replace(u'&#178;', u'').replace(u' ', u''))
         return area
 
-    def set_offer_price(self):
-        self.title = self.get_offer_url()
+    def set_offer_area(self):
+        self.title = self.get_offer_area()
 
     def generate_row(self):
         pass
