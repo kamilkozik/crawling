@@ -13,41 +13,55 @@ class OfferFlat(object):
     soup = None
 
     def __init__(self, soup):
-        if not isinstance(soup, BeautifulSoup):
-            raise TypeError('Expected %s type' % type(BeautifulSoup))
-
-        if soup.find('article', {'class': 'offer-item'}):
+        if len(soup):
             self.soup = soup
-        else:
-            raise ValueError('Cannot find article html tag.')
+
+    def populate_object(self):
+        self.set_offer_title()
+        self.set_offer_area()
+        self.set_offer_price()
+        self.set_offer_price_mkw()
+        self.set_offer_url()
 
     def get_offer_title(self):
-        return self.soup.find('header').find('p', {'class': 'text-nowrap'})
+        return self.soup.find('header').find('p', {'class': 'text-nowrap'}).text.encode('utf8', 'ignore')
 
     def set_offer_title(self):
         self.title = self.get_offer_title()
 
     def get_offer_url(self):
-        return self.soup.find('article').get('data-url')
+        return self.soup.get('data-url').encode('utf8', 'ignore')
 
     def set_offer_url(self):
-        self.title = self.get_offer_url()
+        self.url = self.get_offer_url()
 
     def get_offer_price(self):
-        price_text = self.soup.find('li', {'class': 'offer-item-price'}).text
-        price = int(price_text.replace(u'zł', u'').replace(u' ', u''))
+        price_text = self.soup.find('li', {'class': 'offer-item-price'}).text.encode('utf8', 'ignore')
+        price = float(price_text.replace('zł', '').replace(' ', '')
+                      .replace(',', '.'))
         return price
 
     def set_offer_price(self):
-        self.title = self.get_offer_price()
+        self.price = self.get_offer_price()
+
+    def get_offer_price_mkw(self):
+        price_text = self.soup.find('li', {'class': 'offer-item-price-per-m'}).text.encode('utf8', 'ignore')
+        price_mkw = price_text.replace('zł/m²', '').replace(' ', '')\
+            .replace(',', '.')
+        return price_mkw
+
+    def set_offer_price_mkw(self):
+        self.price_mkw = self.get_offer_price_mkw()
 
     def get_offer_area(self):
-        area_text = self.soup.find('li', {'class': 'offer-item-area'}).text
-        area = int(area_text.replace(u'm', u'').replace(u'&#178;', u'').replace(u' ', u''))
+        area_text = self.soup.find('li', {'class': 'offer-item-area'}).text.encode('utf8', 'ignore')
+        area = area_text.replace('m²', '').replace(' ', '') \
+            .replace(',', '.')
+
+        if area.find('do'):
+            area_range = area.split('do')
+            return area_range[0]
         return area
 
     def set_offer_area(self):
-        self.title = self.get_offer_area()
-
-    def generate_row(self):
-        pass
+        self.area = self.get_offer_area()
